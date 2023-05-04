@@ -9,8 +9,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 @Component
-public class InMemoryItemStorage implements ItemStorage{
+public class InMemoryItemStorage implements ItemStorage {
     private final Map<Long, Item> items = new HashMap<>();
     private Long itemId;
 
@@ -40,7 +41,7 @@ public class InMemoryItemStorage implements ItemStorage{
         return updateItem;
     }
 
-    private void checkItemExist(Long itemId)  {
+    private void checkItemExist(Long itemId) {
         if (!items.containsKey(itemId)) {
             throw new FoundException("Вещь не найдена");
         }
@@ -63,25 +64,17 @@ public class InMemoryItemStorage implements ItemStorage{
 
     @Override
     public List<Item> findAll(Long userId) {
-        return items.values().stream()
-                .filter(item -> item.getOwner().equals(userId))
-                .collect(Collectors.toList());
+        return items.values().stream().filter(item -> item.getOwner().equals(userId)).collect(Collectors.toList());
     }
 
     @Override
     public List<Item> findItemsByQueryText(String queryText) {
         String lowerCaseQueryText = queryText.toLowerCase();
-        return items.values().stream()
-                .filter(item -> isQueryExist(item, lowerCaseQueryText))
-                .collect(Collectors.toList());
+        return items.values().stream().filter(item -> isQueryExist(item, lowerCaseQueryText)).collect(Collectors.toList());
     }
 
     private boolean isQueryExist(Item item, String lowerCaseQueryText) {
-        return item.getAvailable() &&
-                (
-                        item.getName().toLowerCase().contains(lowerCaseQueryText)
-                                || item.getDescription().toLowerCase().contains(lowerCaseQueryText)
-                );
+        return item.getAvailable() && (item.getName().toLowerCase().contains(lowerCaseQueryText) || item.getDescription().toLowerCase().contains(lowerCaseQueryText));
     }
 
     private long getItemId() {

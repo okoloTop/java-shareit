@@ -42,7 +42,6 @@ public class ErrorHandler {
         return new ErrorResponse("Объект не найден");
     }
 
-
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleUnknownException(Throwable e) {
