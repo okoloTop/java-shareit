@@ -6,8 +6,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.practicum.shareit.exception.FoundException;
-import ru.practicum.shareit.exception.ValidationException;
 
 import java.nio.file.AccessDeniedException;
 import java.security.InvalidParameterException;
@@ -23,13 +21,13 @@ public class ErrorHandler {
         return new ErrorResponse("Ошибка валидации");
     }
 
-    @ExceptionHandler({MethodArgumentNotValidException.class,InvalidParameterException.class})
+    @ExceptionHandler({MethodArgumentNotValidException.class, InvalidParameterException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleBadRequest(final Exception e) {
         return new ErrorResponse("Ошибка валидации данных: " + e.getMessage());
     }
 
-    @ExceptionHandler({AccessDeniedException .class})
+    @ExceptionHandler({AccessDeniedException.class})
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ErrorResponse handleForbidden(final Exception e) {
         return new ErrorResponse("Отказ в доступе: " + e.getMessage());
