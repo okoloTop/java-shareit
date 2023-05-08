@@ -1,8 +1,10 @@
-package ru.practicum.shareit.item.storage;
+package ru.practicum.shareit.item.repository;
 
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.exception.FoundException;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.nio.file.AccessDeniedException;
 import java.util.HashMap;
@@ -11,9 +13,14 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
-public class InMemoryItemStorage implements ItemStorage {
+public class InMemoryItemRepository implements ItemRepository {
     private final Map<Long, Item> items = new HashMap<>();
+    private final UserRepository userStorage;
     private Long itemId;
+
+    public InMemoryItemRepository(UserRepository userStorage) {
+        this.userStorage = userStorage;
+    }
 
     @Override
     public Item createItem(Item item) {
@@ -48,10 +55,10 @@ public class InMemoryItemStorage implements ItemStorage {
     }
 
     @Override
-    public void checkUserAccessToItem(Long userId, Long itemId) throws AccessDeniedException {
+    public void checkUserAccessToItem(User user, Long itemId) throws AccessDeniedException {
         checkItemExist(itemId);
         Item item = items.get(itemId);
-        if (!item.getOwner().equals(userId)) {
+        if (!item.getOwner().equals(user)) {
             throw new AccessDeniedException("Вам отказано в доступе к этой вещи");
         }
     }
@@ -64,7 +71,7 @@ public class InMemoryItemStorage implements ItemStorage {
 
     @Override
     public List<Item> findAll(Long userId) {
-        return items.values().stream().filter(item -> item.getOwner().equals(userId)).collect(Collectors.toList());
+        return items.values().stream().filter(item -> item.getOwner().equals(userStorage.getUserById(userId))).collect(Collectors.toList());
     }
 
     @Override

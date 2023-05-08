@@ -5,8 +5,9 @@ import org.springframework.stereotype.Service;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.storage.ItemStorage;
+import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.service.UserService;
 
 import java.nio.file.AccessDeniedException;
@@ -19,7 +20,8 @@ import java.util.List;
 public class ItemServiceImpl implements ItemService {
     private final UserService userService;
     private final ItemMapper itemMapper;
-    private final ItemStorage itemStorage;
+    private final ItemRepository itemRepository;
+    private final UserMapper userMapper;
 
     @Override
     public ItemDto createItem(Long userId, ItemDto itemDto) {
@@ -30,8 +32,8 @@ public class ItemServiceImpl implements ItemService {
         checkBlankParameter(itemDto.getDescription());
         UserDto userDto = userService.findUserById(userId);
         Item item = itemMapper.dtoToItem(itemDto);
-        item.setOwner(userDto.getId());
-        item = itemStorage.createItem(item);
+        item.setOwner(userMapper.dtoToUser(userDto));
+        item = itemRepository.createItem(item);
         return itemMapper.itemToDto(item);
     }
 
@@ -50,22 +52,22 @@ public class ItemServiceImpl implements ItemService {
             checkBlankParameter(itemDto.getDescription());
         }
         UserDto userDto = userService.findUserById(userId);
-        itemStorage.checkUserAccessToItem(userDto.getId(), itemId);
+        itemRepository.checkUserAccessToItem(userMapper.dtoToUser(userDto), itemId);
         itemDto.setId(itemId);
         Item item = itemMapper.dtoToItem(itemDto);
-        item = itemStorage.updateItem(item);
+        item = itemRepository.updateItem(item);
         return itemMapper.itemToDto(item);
     }
 
     @Override
     public ItemDto findItemById(Long itemId) {
-        return itemMapper.itemToDto(itemStorage.getItemById(itemId));
+        return itemMapper.itemToDto(itemRepository.getItemById(itemId));
     }
 
     @Override
     public List<ItemDto> findAllByUserId(Long userId) {
         UserDto userDto = userService.findUserById(userId);
-        return itemListToDto(itemStorage.findAll(userDto.getId()));
+        return itemListToDto(itemRepository.findAll(userDto.getId()));
     }
 
     @Override
@@ -73,7 +75,7 @@ public class ItemServiceImpl implements ItemService {
         if (queryText.trim().isBlank()) {
             return new ArrayList<>();
         }
-        return itemListToDto(itemStorage.findItemsByQueryText(queryText));
+        return itemListToDto(itemRepository.findItemsByQueryText(queryText));
     }
 
     private List<ItemDto> itemListToDto(List<Item> itemList) {

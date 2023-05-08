@@ -1,16 +1,17 @@
-package ru.practicum.shareit.item.storage;
+package ru.practicum.shareit.item.repository;
 
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.model.User;
 
 import java.nio.file.AccessDeniedException;
 import java.util.List;
 
-public interface ItemStorage {
+public interface ItemRepository {
     Item createItem(Item item);
 
     Item updateItem(Item item);
 
-    void checkUserAccessToItem(Long userId, Long itemId) throws AccessDeniedException;
+    void checkUserAccessToItem(User user, Long itemId) throws AccessDeniedException;
 
     Item getItemById(Long itemId);
 
