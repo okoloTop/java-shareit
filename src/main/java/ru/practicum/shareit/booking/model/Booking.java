@@ -3,7 +3,6 @@ package ru.practicum.shareit.booking.model;
 import lombok.Data;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 @Entity
