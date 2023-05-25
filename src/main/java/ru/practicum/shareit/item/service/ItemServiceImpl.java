@@ -1,14 +1,11 @@
 package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingItemDto;
-import ru.practicum.shareit.booking.dto.BookingOutDto;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.FoundException;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.CommentInDto;
@@ -28,36 +25,22 @@ import java.security.InvalidParameterException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ItemServiceImpl implements ItemService {
     private final UserService userService;
-    private final BookingService bookingService;
+    private final BookingRepository bookingRepository;
     private final ItemMapper itemMapper;
     private final ItemRepository itemRepository;
     private final UserMapper userMapper;
     private final ItemBookingMapper itemBookingMapper;
     private final CommentService commentService;
 
-    @Autowired
-    public ItemServiceImpl(UserService userService,
-                           ItemRepository itemRepository,
-                           @Lazy BookingService bookingService,
-                           ItemMapper itemMapper, UserMapper userMapper,
-                           ItemBookingMapper itemBookingMapper, @Lazy CommentService commentService) {
-        this.userService = userService;
-        this.itemRepository = itemRepository;
-        this.bookingService = bookingService;
-        this.itemMapper = itemMapper;
-        this.userMapper = userMapper;
-        this.itemBookingMapper = itemBookingMapper;
-        this.commentService = commentService;
-    }
-
     @Override
+    @Transactional
     public ItemDto createItem(Long userId, ItemDto itemDto) {
         if (itemDto.getAvailable() == null) {
             throw new InvalidParameterException("Нет значения параметра");
@@ -78,6 +61,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional
     public ItemDto updateItem(Long userId, Long itemId, ItemDto itemDto) throws AccessDeniedException {
         if (itemDto.getName() != null) {
             checkBlankParameter(itemDto.getName());
@@ -141,9 +125,10 @@ public class ItemServiceImpl implements ItemService {
             throw new FoundException("Вещь не найдена");
         }
         ItemBookingDto itemBookingDto = itemBookingMapper.itemToDto(item.get());
-        if (Objects.equals(userId, item.get().getOwner())) {
-            List<BookingOutDto> bookingDtoList
-                    = bookingService.findAllBookingByOwnerIdAndItemId(itemId);
+        System.out.println(itemBookingDto);
+        if (userId == item.get().getOwner()) {
+            List<Booking> bookingDtoList
+                    = bookingRepository.findAllAndItemIdOrderByStartAsc(itemId);
             if (bookingDtoList.size() > 0) {
                 if (bookingDtoList.get(0).getStart().isAfter(LocalDateTime.now())) {
                     itemBookingDto.setNextBooking(getBookingItemDto(bookingDtoList.get(0)));
@@ -165,8 +150,8 @@ public class ItemServiceImpl implements ItemService {
         return itemBookingDto;
     }
 
-    private static BookingItemDto getBookingItemDto(BookingOutDto bookingOutDto) {
-        return new BookingItemDto(bookingOutDto.getId(), bookingOutDto.getBooker().getId(),
+    private static BookingItemDto getBookingItemDto(Booking bookingOutDto) {
+        return new BookingItemDto(bookingOutDto.getId(), bookingOutDto.getBooker(),
                 bookingOutDto.getStart(), bookingOutDto.getEnd(), bookingOutDto.getStatus());
     }
 
@@ -184,7 +169,7 @@ public class ItemServiceImpl implements ItemService {
         userService.findUserById(userId);
         User user = userService.findFullUserById(userId);
         Item item = findFullItemById(itemId);
-        List<Booking> bookingList = bookingService.findAllBookingByUserIdAndItemId(userId, itemId, LocalDateTime.now());
+        List<Booking> bookingList = bookingRepository.findAllByItemUserIdAndItemIdOrderByStartDesc(userId, itemId, LocalDateTime.now());
         if (bookingList.size() == 0) {
             throw new InvalidParameterException("нельзя оставить отзыв этой вещи");
         }

@@ -41,5 +41,6 @@ CREATE TABLE IF NOT EXISTS comments
     id        BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     text      VARCHAR(250),
     item_id   BIGINT,
-    author_id BIGINT
+    author_id BIGINT,
+    created TIMESTAMP WITHOUT TIME ZONE NOT NULL
 );

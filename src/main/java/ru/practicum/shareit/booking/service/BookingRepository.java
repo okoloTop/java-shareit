@@ -7,7 +7,7 @@ import ru.practicum.shareit.booking.model.Booking;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public interface BookingService {
+public interface BookingRepository {
     BookingOutDto createBooking(Long userId, BookingDto bookingInDto);
 
     BookingOutDto updateBookingApproveStatus(Long userId, Long bookingId, String bookingStatus);

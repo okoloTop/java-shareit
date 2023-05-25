@@ -7,7 +7,6 @@ import ru.practicum.shareit.booking.dto.BookingOutDto;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.Status;
-import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.AccessException;
 import ru.practicum.shareit.exception.FoundException;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -21,10 +20,10 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class BookingServiceImpl implements BookingService {
+public class BookingServiceImpl implements BookingRepository {
     private final UserService userService;
     private final BookingMapper bookingMapper;
-    private final BookingRepository bookingRepository;
+    private final ru.practicum.shareit.booking.repository.BookingRepository bookingRepository;
     private final ItemService itemService;
 
     @Override

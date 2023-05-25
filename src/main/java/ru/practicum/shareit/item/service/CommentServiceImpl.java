@@ -24,7 +24,7 @@ public class CommentServiceImpl implements CommentService {
     public CommentDto addCommentToItem(User user, Item item, CommentInDto commentInDto) {
         Comment comment = new Comment();
         comment.setItem(item.getId());
-        comment.setAuthor(user.getName());
+        comment.setAuthorId(user.getId());
         comment.setText(commentInDto.getText());
         comment.setCreated(LocalDateTime.now());
         commentRepository.save(comment);
