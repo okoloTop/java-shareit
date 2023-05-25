@@ -25,6 +25,7 @@ import java.security.InvalidParameterException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -126,7 +127,7 @@ public class ItemServiceImpl implements ItemService {
         }
         ItemBookingDto itemBookingDto = itemBookingMapper.itemToDto(item.get());
         System.out.println(itemBookingDto);
-        if (userId == item.get().getOwner()) {
+        if (Objects.equals(userId, item.get().getOwner())) {
             List<Booking> bookingDtoList
                     = bookingRepository.findAllAndItemIdOrderByStartAsc(itemId);
             if (bookingDtoList.size() > 0) {
