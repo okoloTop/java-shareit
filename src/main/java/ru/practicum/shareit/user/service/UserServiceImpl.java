@@ -20,7 +20,6 @@ import java.util.Optional;
 @org.springframework.transaction.annotation.Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
-    private final UserMapper userMapper;
 
     @Override
     public List<UserDto> findAll() {
@@ -30,7 +29,7 @@ public class UserServiceImpl implements UserService {
     private List<UserDto> userListToDto(List<User> userList) {
         List<UserDto> userDtoList = new ArrayList<>();
         for (User user : userList) {
-            userDtoList.add(userMapper.userToDto(user));
+            userDtoList.add(UserMapper.userToDto(user));
         }
         return userDtoList;
     }
@@ -41,8 +40,8 @@ public class UserServiceImpl implements UserService {
         if (userDto.getEmail() == null) {
             throw new InvalidParameterException("Пустой адрес электронной почты");
         }
-        User user = userRepository.save(userMapper.dtoToUser(userDto));
-        return userMapper.userToDto(user);
+        User user = userRepository.save(UserMapper.dtoToUser(userDto));
+        return UserMapper.userToDto(user);
     }
 
     @Override
@@ -51,7 +50,7 @@ public class UserServiceImpl implements UserService {
         if (user.isEmpty()) {
             throw new FoundException("Такого пользователя нет в базе");
         }
-        return userMapper.userToDto(user.get());
+        return UserMapper.userToDto(user.get());
     }
 
     @Override
@@ -72,18 +71,13 @@ public class UserServiceImpl implements UserService {
             updateUser.setName(userDto.getName());
         }
         User user = userRepository.save(updateUser);
-        return userMapper.userToDto(user);
+        return UserMapper.userToDto(user);
     }
 
     @Override
     @Transactional
     public void deleteUserById(Long userId) {
         userRepository.deleteById(userId);
-    }
-
-    @Override
-    public User findFullUserById(Long userId) {
-        return userRepository.findById(userId).orElseThrow(() -> new FoundException("Пользователь не найден"));
     }
 
 }

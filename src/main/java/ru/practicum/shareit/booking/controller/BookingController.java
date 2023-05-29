@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingOutDto;
-import ru.practicum.shareit.booking.service.BookingRepository;
+import ru.practicum.shareit.booking.service.BookingService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -17,7 +17,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class BookingController {
-    private final BookingRepository bookingService;
+    private final BookingService bookingService;
 
     @PostMapping
     public BookingOutDto createBooking(@RequestHeader(name = "X-Sharer-User-Id") Long userId,
@@ -29,9 +29,9 @@ public class BookingController {
     @PatchMapping("{bookingId}")
     public BookingOutDto updateBookingApproveStatus(@RequestHeader(name = "X-Sharer-User-Id") Long userId,
                                                     @NotNull @PathVariable Long bookingId,
-                                                    @RequestParam(name = "approved") String bookingStatus) {
+                                                    @RequestParam @NotNull Boolean approved) {
         log.info("PATCH /bookings - обновление бронирования вещи");
-        return bookingService.updateBookingApproveStatus(userId, bookingId, bookingStatus);
+        return bookingService.updateBookingApproveStatus(userId, bookingId, approved);
     }
 
     @GetMapping("{bookingId}")

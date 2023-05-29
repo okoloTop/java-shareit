@@ -14,8 +14,6 @@ public interface ItemService {
 
     ItemDto updateItem(Long userId, Long itemId, ItemDto itemDto) throws AccessDeniedException;
 
-    ItemDto findItemById(Long itemId);
-
     List<ItemBookingDto> findAllByUserId(Long userId);
 
     List<ItemDto> findItemsByQueryText(String queryText);

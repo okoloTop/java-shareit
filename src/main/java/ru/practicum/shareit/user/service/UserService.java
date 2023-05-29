@@ -16,6 +16,4 @@ public interface UserService {
 
     void deleteUserById(Long userId);
 
-    User findFullUserById(Long userId);
-
 }

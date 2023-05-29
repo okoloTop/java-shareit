@@ -2,15 +2,13 @@ package ru.practicum.shareit.booking.service;
 
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingOutDto;
-import ru.practicum.shareit.booking.model.Booking;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
-public interface BookingRepository {
+public interface BookingService {
     BookingOutDto createBooking(Long userId, BookingDto bookingInDto);
 
-    BookingOutDto updateBookingApproveStatus(Long userId, Long bookingId, String bookingStatus);
+    BookingOutDto updateBookingApproveStatus(Long userId, Long bookingId, Boolean approved);
 
     BookingOutDto findBookingById(Long userId, Long bookingId);
 
@@ -18,7 +16,4 @@ public interface BookingRepository {
 
     List<BookingOutDto> findAllBookingByOwnerAndState(Long ownerId, String state);
 
-    List<BookingOutDto> findAllBookingByOwnerIdAndItemId(Long itemId);
-
-    List<Booking> findAllBookingByUserIdAndItemId(Long userId, Long itemId, LocalDateTime dateTime);
 }

@@ -11,34 +11,32 @@ import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.CommentInDto;
 import ru.practicum.shareit.item.dto.ItemBookingDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.mapper.CommentMapper;
 import ru.practicum.shareit.item.mapper.ItemBookingMapper;
 import ru.practicum.shareit.item.mapper.ItemMapper;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
-import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.service.UserService;
+import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.nio.file.AccessDeniedException;
 import java.security.InvalidParameterException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class ItemServiceImpl implements ItemService {
-    private final UserService userService;
+    private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
-    private final ItemMapper itemMapper;
     private final ItemRepository itemRepository;
-    private final UserMapper userMapper;
-    private final ItemBookingMapper itemBookingMapper;
-    private final CommentService commentService;
+    private final CommentRepository commentRepository;
+
 
     @Override
     @Transactional
@@ -48,11 +46,10 @@ public class ItemServiceImpl implements ItemService {
         }
         checkBlankParameter(itemDto.getName());
         checkBlankParameter(itemDto.getDescription());
-        UserDto userDto = userService.findUserById(userId);
-        Item item = itemMapper.dtoToItem(itemDto);
-        item.setOwner(userMapper.dtoToUser(userDto).getId());
-        item = itemRepository.save(item);
-        return itemMapper.itemToDto(item);
+        User user = userRepository.findById(userId).orElseThrow(() -> new FoundException("Пользователь не найден"));
+        Item item = ItemMapper.dtoToItem(itemDto);
+        item.setOwner(user);
+        return ItemMapper.itemToDto(itemRepository.save(item));
     }
 
     private static void checkBlankParameter(String value) {
@@ -70,14 +67,12 @@ public class ItemServiceImpl implements ItemService {
         if (itemDto.getDescription() != null) {
             checkBlankParameter(itemDto.getDescription());
         }
-        if (userService.findUserById(userId) == null) {
-            throw new FoundException("Пользователь не найден");
-        }
+        userRepository.findById(userId).orElseThrow(() -> new FoundException("Пользователь не найден"));
         Optional<Item> checkItem = itemRepository.findById(itemId);
         if (checkItem.isEmpty()) {
             throw new FoundException("Такой вещи нет в базе");
         }
-        if (!checkItem.get().getOwner().equals(userId)) {
+        if (!checkItem.get().getOwner().getId().equals(userId)) {
             throw new AccessDeniedException("Вещь не принадлежит этому пользователю");
         }
         Item updateItem = checkItem.get();
@@ -90,25 +85,17 @@ public class ItemServiceImpl implements ItemService {
         if (itemDto.getDescription() != null) {
             updateItem.setDescription(itemDto.getDescription());
         }
-        return itemMapper.itemToDto(itemRepository.save(updateItem));
-    }
-
-    @Override
-    public ItemDto findItemById(Long itemId) {
-        if (itemRepository.findById(itemId).isEmpty()) {
-            throw new FoundException("Такой вещи нет в базе");
-        }
-        return itemMapper.itemToDto(itemRepository.findById(itemId).get());
+        return ItemMapper.itemToDto(itemRepository.save(updateItem));
     }
 
     @Override
     public List<ItemBookingDto> findAllByUserId(Long userId) {
-        List<Item> itemList = itemRepository.findAllByOwner(userId);
-        List<ItemBookingDto> itemBookingDtoList = new ArrayList<>();
+        List<Item> itemList = itemRepository.findAllByOwnerId(userId);
+        List<ItemBookingDto> itemDtoList = new ArrayList<>();
         for (Item item : itemList) {
-            itemBookingDtoList.add(findItemBookingById(userId, item.getId()));
+            itemDtoList.add(findItemBookingById(item.getId(), item.getOwner().getId()));
         }
-        return itemBookingDtoList;
+        return itemDtoList;
     }
 
     @Override
@@ -120,46 +107,34 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemBookingDto findItemBookingById(Long userId, Long itemId) {
-        Optional<Item> item = itemRepository.findById(itemId);
-        if (item.isEmpty()) {
-            throw new FoundException("Вещь не найдена");
-        }
-        ItemBookingDto itemBookingDto = itemBookingMapper.itemToDto(item.get());
-        System.out.println(itemBookingDto);
-        if (Objects.equals(userId, item.get().getOwner())) {
-            List<Booking> bookingDtoList
-                    = bookingRepository.findAllAndItemIdOrderByStartAsc(itemId);
-            if (bookingDtoList.size() > 0) {
-                if (bookingDtoList.get(0).getStart().isAfter(LocalDateTime.now())) {
-                    itemBookingDto.setNextBooking(getBookingItemDto(bookingDtoList.get(0)));
-                } else {
-                    itemBookingDto.setLastBooking(getBookingItemDto(bookingDtoList.get(0)));
-                }
+    public ItemBookingDto findItemBookingById(Long itemId, Long userId) {
+        Item item = itemRepository.findById(itemId).orElseThrow(() -> new FoundException("Вещь не найдена"));
+        ItemBookingDto itemBookingDto = ItemBookingMapper.itemToDto(item);
+        itemBookingDto.setComments(getCommentDtoList(itemId));
+        if (userId.equals(item.getOwner().getId())) {
+            List<Booking> bookingLastDtoList
+                    = bookingRepository.findAllByItemIdAndOrderByStartDesc(itemId, LocalDateTime.now());
+            if (bookingLastDtoList.size() > 0) {
+                itemBookingDto.setLastBooking(getBookingItemDto(bookingLastDtoList.get(0)));
             }
-            if (bookingDtoList.size() > 1) {
-                if (bookingDtoList.get(0).getStart().isBefore(LocalDateTime.now()) &&
-                        bookingDtoList.get(1).getStart().isBefore(LocalDateTime.now())) {
-                    itemBookingDto.setNextBooking((getBookingItemDto(bookingDtoList.get(2))));
-                    itemBookingDto.setLastBooking(getBookingItemDto(bookingDtoList.get(1)));
-                } else {
-                    itemBookingDto.setNextBooking(getBookingItemDto(bookingDtoList.get(1)));
-                    itemBookingDto.setLastBooking(getBookingItemDto(bookingDtoList.get(0)));
-                }
+            List<Booking> bookingNextDtoList
+                    = bookingRepository.findAllByItemIdOrderByStartAsc(itemId, LocalDateTime.now());
+            if (bookingNextDtoList.size() > 0) {
+                itemBookingDto.setNextBooking(getBookingItemDto(bookingNextDtoList.get(0)));
             }
         }
         return itemBookingDto;
     }
 
     private static BookingItemDto getBookingItemDto(Booking bookingOutDto) {
-        return new BookingItemDto(bookingOutDto.getId(), bookingOutDto.getBooker(),
+        return new BookingItemDto(bookingOutDto.getId(), bookingOutDto.getBooker().getId(),
                 bookingOutDto.getStart(), bookingOutDto.getEnd(), bookingOutDto.getStatus());
     }
 
     private List<ItemDto> itemListToDto(List<Item> itemList) {
         List<ItemDto> itemDtoList = new ArrayList<>();
         for (Item item : itemList) {
-            itemDtoList.add(itemMapper.itemToDto(item));
+            itemDtoList.add(ItemMapper.itemToDto(item));
         }
         return itemDtoList;
     }
@@ -167,19 +142,42 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional
     public CommentDto addCommentToItem(Long userId, Long itemId, CommentInDto commentInDto) {
-        userService.findUserById(userId);
-        User user = userService.findFullUserById(userId);
+        User user = userRepository.findById(userId).orElseThrow(() -> new FoundException("Пользователь не найден"));
         Item item = findFullItemById(itemId);
         List<Booking> bookingList = bookingRepository.findAllByItemUserIdAndItemIdOrderByStartDesc(userId, itemId, LocalDateTime.now());
         if (bookingList.size() == 0) {
             throw new InvalidParameterException("нельзя оставить отзыв этой вещи");
         }
-        return commentService.addCommentToItem(user, item, commentInDto);
+        Comment comment = new Comment();
+        comment.setItem(item.getId());
+        comment.setAuthorId(user.getId());
+        comment.setText(commentInDto.getText());
+        comment.setCreated(LocalDateTime.now());
+        commentRepository.save(comment);
+        CommentDto commentDto = CommentMapper.commentToDto(comment);
+        commentDto.setAuthorName(getCommentAuthorName(userId));
+        return commentDto;
     }
 
     @Override
     public Item findFullItemById(Long itemId) {
         return itemRepository.findById(itemId).orElseThrow(() -> new FoundException("Вещь не найдена"));
+    }
+
+    private String getCommentAuthorName(Long userId) {
+        User user = userRepository.findUserById(userId).orElseThrow(() -> new FoundException("Вещь не найдена"));
+        return user.getName();
+    }
+
+    private List<CommentDto> getCommentDtoList(Long itemId) {
+        List<Comment> commentList = commentRepository.findAllByCommentAndItemId(itemId);
+        List<CommentDto> commentDtoList = CommentMapper.commentListToDto(commentList);
+        for (Comment commentList1 : commentList) {
+            for (CommentDto commentDto : commentDtoList) {
+                commentDto.setAuthorName(getCommentAuthorName(commentList1.getAuthorId()));
+            }
+        }
+        return commentDtoList;
     }
 }
 

@@ -25,9 +25,9 @@ public class ItemController {
     private final ItemService itemService;
 
     @GetMapping
-    public List<ItemBookingDto> findAllItemsByUserId(@NotNull @RequestHeader(name = "X-Sharer-User-Id") Long userId) {
+    public List<ItemBookingDto> findAllItemsByUserId(@NotNull @RequestHeader(name = "X-Sharer-User-Id") Long ownerId) {
         log.info("GET /items - получение списка вещей по id пользователя.");
-        return itemService.findAllByUserId(userId);
+        return itemService.findAllByUserId(ownerId);
     }
 
     @PostMapping
@@ -38,9 +38,8 @@ public class ItemController {
     }
 
     @GetMapping("{itemId}")
-    public ItemBookingDto findItemById(@RequestHeader(name = "X-Sharer-User-Id") Long userId,
-                                       @NotNull @PathVariable Long itemId) {
-        return itemService.findItemBookingById(userId, itemId);
+    public ItemBookingDto findItemById(@PathVariable Long itemId, @RequestHeader("X-Sharer-User-Id") Long userId) {
+        return itemService.findItemBookingById(itemId, userId);
     }
 
     @PatchMapping("{itemId}")
