@@ -1,21 +1,22 @@
 package ru.practicum.shareit.item.repository;
 
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.model.User;
 
-import java.nio.file.AccessDeniedException;
 import java.util.List;
 
-public interface ItemRepository {
-    Item createItem(Item item);
+public interface ItemRepository extends JpaRepository<Item, Long> {
+    @Query("SELECT i " +
+            " FROM Item as i " +
+            " WHERE " +
+            " i.available = true" +
+            " AND (" +
+            " LOWER(i.name) LIKE LOWER(CONCAT('%',:queryText,'%')) " +
+            " OR  LOWER(i.description) LIKE LOWER(CONCAT('%',:queryText,'%'))" +
+            " )"
+    )
+    List<Item> findItemByAvailableAndQueryContainWithIgnoreCase(String queryText);
 
-    Item updateItem(Item item);
-
-    void checkUserAccessToItem(User user, Long itemId) throws AccessDeniedException;
-
-    Item getItemById(Long itemId);
-
-    List<Item> findAll(Long userId);
-
-    List<Item> findItemsByQueryText(String queryText);
+    List<Item> findAllByOwnerId(Long ownerId);
 }

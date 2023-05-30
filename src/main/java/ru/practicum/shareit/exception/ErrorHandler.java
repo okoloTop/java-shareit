@@ -21,10 +21,10 @@ public class ErrorHandler {
         return new ErrorResponse("Ошибка валидации");
     }
 
-    @ExceptionHandler({MethodArgumentNotValidException.class, InvalidParameterException.class})
+    @ExceptionHandler({MethodArgumentNotValidException.class, InvalidParameterException.class, AccessException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleBadRequest(final Exception e) {
-        return new ErrorResponse("Ошибка валидации данных: " + e.getMessage());
+        return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler({AccessDeniedException.class})

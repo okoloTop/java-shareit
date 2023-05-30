@@ -4,6 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.CommentInDto;
+import ru.practicum.shareit.item.dto.ItemBookingDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
 
@@ -22,9 +25,9 @@ public class ItemController {
     private final ItemService itemService;
 
     @GetMapping
-    public List<ItemDto> findAllItemsByUserId(@NotNull @RequestHeader(name = "X-Sharer-User-Id") Long userId) {
+    public List<ItemBookingDto> findAllItemsByUserId(@NotNull @RequestHeader(name = "X-Sharer-User-Id") Long ownerId) {
         log.info("GET /items - получение списка вещей по id пользователя.");
-        return itemService.findAllByUserId(userId);
+        return itemService.findAllByUserId(ownerId);
     }
 
     @PostMapping
@@ -35,9 +38,8 @@ public class ItemController {
     }
 
     @GetMapping("{itemId}")
-    public ItemDto findItemById(@NotNull @PathVariable Long itemId) {
-        log.info("GET /items - поиск вещи по id.");
-        return itemService.findItemById(itemId);
+    public ItemBookingDto findItemById(@PathVariable Long itemId, @RequestHeader("X-Sharer-User-Id") Long userId) {
+        return itemService.findItemBookingById(itemId, userId);
     }
 
     @PatchMapping("{itemId}")
@@ -53,6 +55,14 @@ public class ItemController {
     public List<ItemDto> findItemsByQueryText(@RequestParam(name = "text", defaultValue = "") String queryText) {
         log.info("GET /items search- поиск вещи.");
         return itemService.findItemsByQueryText(queryText);
+    }
+
+    @PostMapping("{itemId}/comment")
+    public CommentDto addCommentToItem(@RequestHeader(name = "X-Sharer-User-Id") Long userId,
+                                       @NotNull @PathVariable Long itemId,
+                                       @Valid @RequestBody CommentInDto commentInDto) {
+        log.info("POST {itemId}/comment - добавление комментария");
+        return itemService.addCommentToItem(userId, itemId, commentInDto);
     }
 }
 
