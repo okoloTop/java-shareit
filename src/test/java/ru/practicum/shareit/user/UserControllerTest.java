@@ -86,7 +86,7 @@ class UserControllerTest {
     }
 
     @Test
-    void FindByIdTest() throws Exception {
+    void findByIdTest() throws Exception {
         Mockito.when(userService.findUserById(1L)).thenReturn(user);
 
         mockMvc.perform(get("/users/{id}", 1L)

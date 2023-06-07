@@ -9,7 +9,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import ru.practicum.shareit.exception.FoundException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.dto.RequestDto;
@@ -22,11 +21,10 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -90,7 +88,7 @@ class RequestServiceImplTest {
 
     @Test
     void createItemRequestWrongUserTest() {
-        String message = String.format("Пользователь не найден");
+        String message = "Пользователь не найден";
 
         Mockito.when(userRepository.findUserById(99L)).thenThrow(new FoundException(message));
 
@@ -104,7 +102,7 @@ class RequestServiceImplTest {
     @Test
     void findAllByRequestorIdTest() {
         Mockito.when(userRepository.findUserById(1L)).thenReturn(Optional.ofNullable(requestor));
-        Mockito.when(itemRequestRepository.findAllByRequestorId(pageRequest,1L)).thenReturn(List.of(savedItemRequest));
+        Mockito.when(itemRequestRepository.findAllByRequestorId(pageRequest, 1L)).thenReturn(List.of(savedItemRequest));
 
         List<RequestDto> returned = service.findAllRequestByUserId(1L, 0, 20);
 
@@ -120,7 +118,7 @@ class RequestServiceImplTest {
 
     @Test
     void findAllByRequestorWrongUserTest() {
-        String message = String.format("Пользователь не найден");
+        String message = "Пользователь не найден";
 
         Mockito.when(userRepository.findUserById(99L)).thenThrow(new FoundException(message));
 
@@ -168,7 +166,7 @@ class RequestServiceImplTest {
 
     @Test
     void getItemRequestWrongUserIdTest() {
-        String message = String.format("Пользователь не найден");
+        String message = "Пользователь не найден";
 
         when(userRepository.findUserById(99L)).thenReturn(Optional.empty());
 
