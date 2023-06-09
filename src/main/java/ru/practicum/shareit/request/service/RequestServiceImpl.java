@@ -27,7 +27,7 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public RequestDto createItemRequest(Long userId, RequestInDto requestInDto) {
-        User user = userRepository.findUserById(userId).orElseThrow(() -> new FoundException("Пользователь не найден"));
+        User user = checkUserExist(userId);
         ItemRequest request = RequestMapper.dtoToItemRequest(requestInDto);
         request.setCreated(LocalDateTime.now());
         request.setRequestor(user);
@@ -38,7 +38,7 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public List<RequestDto> findAllRequestByUserId(Long userId, Integer from, Integer size) {
-        userRepository.findUserById(userId).orElseThrow(() -> new FoundException("Пользователь не найден"));
+        checkUserExist(userId);
         List<RequestDto> requestInDtoList = new ArrayList<>();
         Pageable pageable = PageRequest.of(from / size, size);
         List<ItemRequest> requestList = requestRepository.findAllByRequestorId(pageable, userId);
@@ -54,7 +54,7 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public RequestDto getRequestById(Long userId, Long requestId) {
-        userRepository.findUserById(userId).orElseThrow(() -> new FoundException("Пользователь не найден"));
+        checkUserExist(userId);
         ItemRequest request = requestRepository.findById(requestId)
                 .orElseThrow(() -> new FoundException("Запрос не найден"));
         RequestDto requestDto = RequestMapper.requestToDto(request);
@@ -65,8 +65,8 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
-    public List<RequestDto> getPageableRequestById(Long userId, Integer from, Integer size) {
-        userRepository.findUserById(userId).orElseThrow(() -> new FoundException("Пользователь не найден"));
+    public List<RequestDto> getPageableRequestByUserId(Long userId, Integer from, Integer size) {
+        checkUserExist(userId);
         int page = from / size;
         PageRequest pageRequest = PageRequest.of(page, size);
         List<RequestDto> requestInDtoList = new ArrayList<>();
@@ -79,5 +79,9 @@ public class RequestServiceImpl implements RequestService {
             requestInDtoList.add(requestDto);
         }
         return requestInDtoList;
+    }
+
+    private User checkUserExist(Long userId) {
+        return userRepository.findUserById(userId).orElseThrow(() -> new FoundException("Пользователь не найден"));
     }
 }

@@ -54,7 +54,7 @@ public class ItemRequestController {
                                                    @Positive
                                                    @RequestParam(name = "size", defaultValue = Constants.PAGE_SIZE_STRING) Integer size) {
         log.info("GET /requests/all - список запросов");
-        return requestService.getPageableRequestById(userId, from, size);
+        return requestService.getPageableRequestByUserId(userId, from, size);
     }
 
 }

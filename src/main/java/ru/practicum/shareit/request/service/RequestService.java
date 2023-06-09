@@ -12,5 +12,5 @@ public interface RequestService {
 
     RequestDto getRequestById(Long userId, Long requestId);
 
-    List<RequestDto> getPageableRequestById(Long userId, Integer from, Integer size);
+    List<RequestDto> getPageableRequestByUserId(Long userId, Integer from, Integer size);
 }

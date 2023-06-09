@@ -40,7 +40,7 @@ class BookingControllerTest {
 
     private BookingOutDto bookingDto;
 
-    LocalDateTime now = LocalDateTime.now();
+    private LocalDateTime now = LocalDateTime.now();
 
     @BeforeEach
     void setUp() {
@@ -59,7 +59,7 @@ class BookingControllerTest {
     }
 
     @Test
-    void createBookingTest() throws Exception {
+    void createBookingNormalTest() throws Exception {
         BookingDto bookingNewDto = new BookingDto();
         bookingNewDto.setItemId(1L);
         bookingNewDto.setStart(now.plusDays(1));
@@ -81,7 +81,7 @@ class BookingControllerTest {
     }
 
     @Test
-    void updateBookingApproveStatusTest() throws Exception {
+    void updateBookingApproveStatusNormalTest() throws Exception {
         when(bookingService.updateBookingApproveStatus(anyLong(), anyLong(), anyBoolean()))
                 .thenReturn(bookingDto);
 
@@ -108,7 +108,7 @@ class BookingControllerTest {
     }
 
     @Test
-    void findBookingByIdTest() throws Exception {
+    void findBookingByIdNormalTest() throws Exception {
         when(bookingService.findBookingById(anyLong(), anyLong()))
                 .thenReturn(bookingDto);
 
@@ -122,7 +122,7 @@ class BookingControllerTest {
     }
 
     @Test
-    void findAllBookingTest() throws Exception {
+    void findAllBookingByUserAndStateNormalTest() throws Exception {
         List<BookingOutDto> bookingDtoList = List.of(bookingDto);
         when(bookingService.findAllBookingByUserAndState(anyLong(), anyString(), anyInt(), anyInt()))
                 .thenReturn(bookingDtoList);
@@ -137,7 +137,7 @@ class BookingControllerTest {
     }
 
     @Test
-    void getAll_WrongState_ReturnBadRequest() throws Exception {
+    void getAllBookingByUser_WrongState_ReturnBadRequest() throws Exception {
         when(bookingService.findAllBookingByUserAndState(anyLong(), anyString(), anyInt(), anyInt()))
                 .thenThrow(AccessException.class);
         mockMvc.perform(get("/bookings")
@@ -151,7 +151,7 @@ class BookingControllerTest {
     }
 
     @Test
-    void geOwnerAll_Normal() throws Exception {
+    void getOwnerAllBookings_NormalCase() throws Exception {
         List<BookingOutDto> bookingDtoList = List.of(bookingDto);
         when(bookingService.findAllBookingByOwnerAndState(anyLong(), anyString(), anyInt(), anyInt()))
                 .thenReturn(bookingDtoList);
@@ -166,7 +166,7 @@ class BookingControllerTest {
     }
 
     @Test
-    void geOwnerAll_WrongState_ReturnBadRequest() throws Exception {
+    void getOwnerAllBookings_WrongState_ReturnBadRequest() throws Exception {
         when(bookingService.findAllBookingByOwnerAndState(anyLong(), anyString(), anyInt(), anyInt()))
                 .thenThrow(AccessException.class);
 

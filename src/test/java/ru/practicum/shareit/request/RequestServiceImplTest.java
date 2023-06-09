@@ -39,14 +39,15 @@ class RequestServiceImplTest {
     @InjectMocks
     private RequestServiceImpl service;
 
-    LocalDateTime created =
+    private LocalDateTime created =
             LocalDateTime.of(2023, 5, 26, 10, 10, 0);
 
-    RequestInDto requestDto;
-    Item item;
-    User requestor;
-    ItemRequest savedItemRequest;
-    PageRequest pageRequest = PageRequest.of(0, 20);
+    private RequestInDto requestDto;
+    private Item item;
+
+    private User requestor;
+    private ItemRequest savedItemRequest;
+    private PageRequest pageRequest = PageRequest.of(0, 20);
 
     @BeforeEach
     void setUp() {
@@ -138,7 +139,7 @@ class RequestServiceImplTest {
         Mockito.when(itemRequestRepository.findAllByRequestorIdNotOrderByCreatedDesc(pageRequest, 1L))
                 .thenReturn(List.of(savedItemRequest));
 
-        List<RequestDto> returned = service.getPageableRequestById(1L, 0, 20);
+        List<RequestDto> returned = service.getPageableRequestByUserId(1L, 0, 20);
 
         Assertions.assertThat(returned)
                 .isNotNull()

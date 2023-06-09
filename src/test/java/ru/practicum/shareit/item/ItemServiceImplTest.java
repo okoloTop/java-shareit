@@ -115,7 +115,7 @@ class ItemServiceImplTest {
     }
 
     @Test
-    void createItemTest() {
+    void createItemNormalTest() {
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
         when(itemRepository.save(any(Item.class))).thenReturn(item);
 
@@ -132,7 +132,7 @@ class ItemServiceImplTest {
     }
 
     @Test
-    void createItemWithRequestIdTest() {
+    void createItemWithRequestIdNormalTest() {
         itemDto.setRequestId(1L);
         itemDtoForAssert.setRequestId(1L);
 
@@ -201,7 +201,7 @@ class ItemServiceImplTest {
     }
 
     @Test
-    void updateItemTest() throws AccessDeniedException {
+    void updateItemNormalTest() throws AccessDeniedException {
         itemDto.setId(1L);
         itemDto.setName("обновленный молоток");
         itemDto.setDescription("хороший обновленный молоток");
@@ -263,7 +263,7 @@ class ItemServiceImplTest {
 
 
     @Test
-    void findItemByIdTest() {
+    void findItemByIdNormalTest() {
         itemBookingForAssert.setOwner(user);
         when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
         when(commentRepository.findAllByCommentAndItemId(1L))
@@ -277,7 +277,7 @@ class ItemServiceImplTest {
     }
 
     @Test
-    void findItemByIdWithBookingTest() {
+    void findItemByIdWithBookingNormalTest() {
         BookingItemDto last = new BookingItemDto(1L, 2L, LocalDateTime.now().minusDays(4).withNano(0), LocalDateTime.now().minusDays(2).withNano(0), Status.APPROVED);
         BookingItemDto next = new BookingItemDto(2L, 3L, LocalDateTime.now().plusDays(1).withNano(0), LocalDateTime.now().plusDays(2).withNano(0), Status.APPROVED);
         Booking bookingLast = new Booking(1L, LocalDateTime.now().minusDays(4).withNano(0), LocalDateTime.now().minusDays(2).withNano(0), item, user2, Status.APPROVED);
@@ -314,7 +314,7 @@ class ItemServiceImplTest {
     }
 
     @Test
-    void findAllItemsByUserIdTest() {
+    void findAllItemsByUserIdNormalTest() {
         List<Item> items = List.of(item, item2);
 
         when(itemRepository.findAllByOwnerId(anyLong()))
@@ -332,7 +332,7 @@ class ItemServiceImplTest {
     }
 
     @Test
-    void searchTest() {
+    void searchItemByTextNormalTest() {
         List<Item> items = List.of(item, item2);
         when(itemRepository.findItemByAvailableAndQueryContainWithIgnoreCase(any()))
                 .thenReturn(items);
@@ -348,7 +348,7 @@ class ItemServiceImplTest {
     }
 
     @Test
-    void searchEmptyTextTest() {
+    void searchItemEmptyTextTest() {
         List<ItemDto> result = itemService.findItemsByQueryText("");
 
         Assertions.assertThat(result)
@@ -358,7 +358,7 @@ class ItemServiceImplTest {
     }
 
     @Test
-    void addEmptyCommentTest() {
+    void addEmptyCommentToItemTest() {
         CommentInDto commentNewDto = new CommentInDto();
         commentNewDto.setText("");
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
@@ -371,7 +371,7 @@ class ItemServiceImplTest {
     }
 
     @Test
-    void addCommentTest() {
+    void addCommentToItemNormalTest() {
         LocalDateTime now = LocalDateTime.of(2023, 06, 01, 01, 12, 12);
         Booking booking = Booking.builder()
                 .id(1L)

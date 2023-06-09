@@ -173,7 +173,7 @@ class BookingServiceImplTest {
     }
 
     @Test
-    void updateBookingApproveStatusTest() {
+    void updateBookingApproveStatusNormalTest() {
         bookingDtoMastBe.setStatus(Status.APPROVED);
         when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.of(user));
@@ -258,7 +258,7 @@ class BookingServiceImplTest {
     }
 
     @Test
-    void findBookingByIdTest() {
+    void findBookingByIdNormalTest() {
         when(bookingRepository.findByIdAndBookerOrOwner(anyLong(), anyLong()))
                 .thenReturn(Optional.of(booking));
         when(userRepository.findById(anyLong()))
@@ -274,7 +274,7 @@ class BookingServiceImplTest {
     }
 
     @Test
-    void getAllBookingsTest() {
+    void getAllBookingsByUserNormalTest() {
         when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.of(user));
 
@@ -314,7 +314,7 @@ class BookingServiceImplTest {
     }
 
     @Test
-    void findAllBookingByOwnerAndStateTest() {
+    void findAllBookingByOwnerAndStateNormalTest() {
         when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.of(user));
 

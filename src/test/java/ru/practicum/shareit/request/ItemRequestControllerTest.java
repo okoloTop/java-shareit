@@ -117,7 +117,7 @@ class ItemRequestControllerTest {
 
     @Test
     void findAllTest() throws Exception {
-        when(itemRequestService.getPageableRequestById(anyLong(), anyInt(), anyInt()))
+        when(itemRequestService.getPageableRequestByUserId(anyLong(), anyInt(), anyInt()))
                 .thenReturn(List.of(requestDto, requestDto2));
 
         mockMvc.perform(get("/requests/all")
@@ -131,7 +131,7 @@ class ItemRequestControllerTest {
 
     @Test
     void findAllWrongUserIdTest() throws Exception {
-        when(itemRequestService.getPageableRequestById(anyLong(), anyInt(), anyInt()))
+        when(itemRequestService.getPageableRequestByUserId(anyLong(), anyInt(), anyInt()))
                 .thenThrow(FoundException.class);
 
         mockMvc.perform(get("/requests/all")
