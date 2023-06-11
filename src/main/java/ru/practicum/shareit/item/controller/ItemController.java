@@ -45,7 +45,7 @@ public class ItemController {
     @PatchMapping("{itemId}")
     public ItemDto updateItem(@RequestHeader(name = "X-Sharer-User-Id") Long userId,
                               @NotNull @PathVariable Long itemId,
-                              @Valid @RequestBody ItemDto itemDto)
+                              @RequestBody ItemDto itemDto)
             throws AccessDeniedException {
         log.info("PATCH /items - обновление вещи.");
         return itemService.updateItem(userId, itemId, itemDto);

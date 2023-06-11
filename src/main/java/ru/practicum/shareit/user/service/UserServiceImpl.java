@@ -40,6 +40,9 @@ public class UserServiceImpl implements UserService {
         if (userDto.getEmail() == null) {
             throw new InvalidParameterException("Пустой адрес электронной почты");
         }
+        if (userDto.getName() == null || userDto.getName().isBlank()) {
+            throw new InvalidParameterException("Пустой адрес электронной почты");
+        }
         User user = userRepository.save(UserMapper.dtoToUser(userDto));
         return UserMapper.userToDto(user);
     }
@@ -56,14 +59,11 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserDto updateUser(Long userId, UserDto userDto) {
-        if (userRepository.findUserById(userId).isEmpty()) {
-            throw new FoundException("Такого пользователя нет в базе");
-        }
+        User updateUser = userRepository.findUserById(userId).orElseThrow(() -> new FoundException(String.format("Пользователь c id=%d не найден.", userId)));
         if (userRepository.findUserByEmail(userDto.getEmail()).isPresent() &&
-                !userRepository.findUserById(userId).get().getEmail().equals(userDto.getEmail())) {
+                !updateUser.getEmail().equals(userDto.getEmail())) {
             throw new ValidationException("Пользователь с таким email уже существует");
         }
-        User updateUser = userRepository.findUserById(userId).get();
         if (userDto.getEmail() != null) {
             updateUser.setEmail(userDto.getEmail());
         }

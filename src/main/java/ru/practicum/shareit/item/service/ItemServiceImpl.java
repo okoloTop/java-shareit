@@ -18,6 +18,8 @@ import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.request.repository.RequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
@@ -36,6 +38,7 @@ public class ItemServiceImpl implements ItemService {
     private final BookingRepository bookingRepository;
     private final ItemRepository itemRepository;
     private final CommentRepository commentRepository;
+    private final RequestRepository requestRepository;
 
 
     @Override
@@ -48,6 +51,10 @@ public class ItemServiceImpl implements ItemService {
         checkBlankParameter(itemDto.getDescription());
         User user = userRepository.findById(userId).orElseThrow(() -> new FoundException("Пользователь не найден"));
         Item item = ItemMapper.dtoToItem(itemDto);
+        if (itemDto.getRequestId() != null) {
+            ItemRequest request = requestRepository.findById(itemDto.getRequestId()).orElseThrow(() -> new FoundException("Запрос не найден"));
+            item.setRequest(request);
+        }
         item.setOwner(user);
         return ItemMapper.itemToDto(itemRepository.save(item));
     }
@@ -84,6 +91,10 @@ public class ItemServiceImpl implements ItemService {
         }
         if (itemDto.getDescription() != null) {
             updateItem.setDescription(itemDto.getDescription());
+        }
+        if (itemDto.getRequestId() != null) {
+            ItemRequest request = requestRepository.findById(itemDto.getRequestId()).orElseThrow(() -> new FoundException("Запрос не найден"));
+            updateItem.setRequest(request);
         }
         return ItemMapper.itemToDto(itemRepository.save(updateItem));
     }
@@ -165,7 +176,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     private String getCommentAuthorName(Long userId) {
-        User user = userRepository.findUserById(userId).orElseThrow(() -> new FoundException("Вещь не найдена"));
+        User user = userRepository.findById(userId).orElseThrow(() -> new FoundException("Пользователь не найден"));
         return user.getName();
     }
 

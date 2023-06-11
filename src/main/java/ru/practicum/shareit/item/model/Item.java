@@ -1,8 +1,7 @@
 package ru.practicum.shareit.item.model;
 
 
-import lombok.Data;
-import lombok.ToString;
+import lombok.*;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
@@ -12,7 +11,11 @@ import javax.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "items", schema = "public")
-@Data
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,8 +31,8 @@ public class Item {
     private Boolean available;
     @ManyToOne
     @JoinColumn(name = "owner_id", nullable = false)
-    @ToString.Exclude
     private User owner;
-    @Transient
+    @ManyToOne
+    @JoinColumn(name = "request_id")
     private ItemRequest request;
 }
