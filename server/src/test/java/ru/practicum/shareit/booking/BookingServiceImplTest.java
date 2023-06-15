@@ -352,6 +352,7 @@ class BookingServiceImplTest {
         List<BookingOutDto> listWaiting = bookingService.findAllBookingByOwnerAndState(1L, "WAITING", 0, 20);
         Assertions.assertThat(listWaiting).hasSize(1);
     }
+
     @Test
     void createBookerIsEqualOwnerTest() {
         when(userRepository.findById(anyLong()))
