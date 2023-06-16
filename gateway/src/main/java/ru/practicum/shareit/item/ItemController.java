@@ -11,7 +11,7 @@ import ru.practicum.shareit.item.dto.ItemRequestDto;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.nio.file.AccessDeniedException;
-
+import java.util.Collections;
 
 
 @RestController
@@ -29,36 +29,40 @@ public class ItemController {
     }
 
     @PostMapping
-    public ResponseEntity<Object>  createItem(@NotNull @RequestHeader(name = "X-Sharer-User-Id") Long userId,
-                              @Valid @RequestBody ItemRequestDto itemDto) {
+    public ResponseEntity<Object> createItem(@NotNull @RequestHeader(name = "X-Sharer-User-Id") Long userId,
+                                             @Valid @RequestBody ItemRequestDto itemDto) {
         log.info("POST /items - создание новой вещи.");
         return itemClient.create(userId, itemDto);
     }
 
     @GetMapping("{itemId}")
-    public ResponseEntity<Object>  findItemById(@PathVariable Long itemId, @RequestHeader("X-Sharer-User-Id") Long userId) {
+    public ResponseEntity<Object> findItemById(@PathVariable Long itemId, @RequestHeader("X-Sharer-User-Id") Long userId) {
         return itemClient.findById(itemId, userId);
     }
 
     @PatchMapping("{itemId}")
-    public ResponseEntity<Object>  updateItem(@RequestHeader(name = "X-Sharer-User-Id") Long userId,
-                              @NotNull @PathVariable Long itemId,
-                              @RequestBody ItemRequestDto itemDto)
+    public ResponseEntity<Object> updateItem(@RequestHeader(name = "X-Sharer-User-Id") Long userId,
+                                             @NotNull @PathVariable Long itemId,
+                                             @RequestBody ItemRequestDto itemDto)
             throws AccessDeniedException {
         log.info("PATCH /items - обновление вещи.");
         return itemClient.update(userId, itemId, itemDto);
     }
 
     @GetMapping("search")
-    public ResponseEntity<Object>  findItemsByQueryText(@RequestParam(name = "text", defaultValue = "") String queryText) {
+    public ResponseEntity<Object> findItemsByQueryText(@RequestParam(name = "text", defaultValue = "") String queryText) {
         log.info("GET /items search- поиск вещи.");
-        return itemClient.search(queryText);
+        if (queryText == null || queryText.isBlank()) {
+            return ResponseEntity.ok(Collections.EMPTY_LIST);
+        } else {
+            return itemClient.search(queryText);
+        }
     }
 
     @PostMapping("{itemId}/comment")
-    public ResponseEntity<Object>  addCommentToItem(@RequestHeader(name = "X-Sharer-User-Id") Long userId,
-                                       @NotNull @PathVariable Long itemId,
-                                       @Valid @RequestBody CommentRequestDto commentInDto) {
+    public ResponseEntity<Object> addCommentToItem(@RequestHeader(name = "X-Sharer-User-Id") Long userId,
+                                                   @NotNull @PathVariable Long itemId,
+                                                   @Valid @RequestBody CommentRequestDto commentInDto) {
         log.info("POST {itemId}/comment - добавление комментария");
         return itemClient.addComment(userId, itemId, commentInDto);
     }
